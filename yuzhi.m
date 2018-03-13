@@ -1,0 +1,46 @@
+I=imread('a.jpg');
+subplot(1,3,1);imshow(I);title('原图');
+I1=rgb2gray(I);
+subplot(1,3,2);imhist(I1);title('直方图');
+level=graythresh(I);
+g=im2bw(I,level);%最佳阈值level
+subplot(1,3,3);imshow(g);title('阈值分割');
+%在Command窗口输出灰度阈值
+disp(strcat('graythresh 计算灰度阈值：',num2str(uint8(level*255))))
+%第二种：迭代求阈值
+I=imread('a.jpg');
+Zmax=max(max(I));
+Zmin=min(min(I));
+TK=(Zmax+Zmin)/2;%初始阈值
+flag=1;
+[m,n]=size(I);
+while(flag)
+    fg=0;
+    bg=0;
+    fgsum=0;
+    bgsum=0;
+    for i=1:m
+        for j=1:n
+            tmp=I(i,j);
+            if(tmp>=TK)
+                fg=fg+1;
+                fgsum=fgsum+double(tmp);
+            else
+                bg=bg+1;
+                bgsum=bgsum+double(tmp);
+            end
+        end
+    end
+    u1=fgsum/fg;
+    u2=bgsum/bg;
+    TKTmp=uint8((u1+u2)/2);
+    if(TKTmp==TK)
+        flag=0;
+    else
+        TK=TKTmp;
+    end
+end
+disp(strcat('迭代后的阈值：',num2str(TK)));
+newI=im2bw(I,double(TK)/255);
+subplot(1,2,1);imshow(I);title('原图')
+subplot(1,2,2);imshow(newI);title('阈值分割图');
